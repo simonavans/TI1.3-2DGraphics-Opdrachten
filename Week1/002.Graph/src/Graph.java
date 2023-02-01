@@ -9,9 +9,11 @@ import javafx.stage.Stage;
 import org.jfree.fx.FXGraphics2D;
 
 public class Graph extends Application {
+    private Canvas canvas;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Canvas canvas = new Canvas(1920, 1080);
+        canvas = new Canvas(1920, 1080);
         draw(new FXGraphics2D(canvas.getGraphicsContext2D()));
         primaryStage.setScene(new Scene(new Group(canvas)));
         primaryStage.setTitle("Graph");
@@ -20,12 +22,28 @@ public class Graph extends Application {
     
     
     public void draw(FXGraphics2D graphics) {
+        graphics.translate(canvas.getWidth()/2, canvas.getHeight()/2);
+        graphics.scale( 1, -1);
+
+        graphics.setColor(Color.red);
+        graphics.drawLine(0,0,1000,0);
+        graphics.setColor(Color.green);
+        graphics.drawLine(0,0,0,1000);
+        graphics.setColor(Color.black);
+
+        double resolution = 0.1;
+        double scale = 50.0;
+        double lastY = 0;
+
+        for(double x = 0; x < 10; x += resolution)
+        {
+            float y = (float) (Math.pow(x, 3));
+
+            graphics.draw(new Line2D.Double(x*scale, y*scale, (x-resolution)*scale, lastY*scale));
+            lastY = y;
+        }
     }
-    
-    
-    
     public static void main(String[] args) {
         launch(Graph.class);
     }
-
 }

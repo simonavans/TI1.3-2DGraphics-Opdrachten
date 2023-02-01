@@ -47,9 +47,7 @@ public class Spirograph extends Application {
         //you can use Double.parseDouble(v1.getText()) to get a double value from the first textfield
         //feel free to add more textfields or other controls if needed, but beware that swing components might clash in naming
     }
-    
-    
-    
+
     public static void main(String[] args) {
         launch(Spirograph.class);
     }

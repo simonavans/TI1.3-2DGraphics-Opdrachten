@@ -17,6 +17,27 @@ public class House extends Application {
 
 
     public void draw(FXGraphics2D graphics) {
+        // Outline
+        graphics.drawLine(100, 500, 400, 500);
+
+        graphics.drawLine(100, 500, 100, 300);
+        graphics.drawLine(400, 500, 400, 300);
+
+        graphics.drawLine(100, 300, 250, 150);
+        graphics.drawLine(400, 300, 250, 150);
+
+        // Door
+        graphics.drawLine(150, 500, 150, 400);
+        graphics.drawLine(200, 500, 200, 400);
+
+        graphics.drawLine(150, 400, 200, 400);
+
+        // Window
+        graphics.drawLine(250, 375, 375, 375);
+        graphics.drawLine(250, 450, 375, 450);
+
+        graphics.drawLine(250, 375, 250, 450);
+        graphics.drawLine(375, 375, 375, 450);
     }
 
 
