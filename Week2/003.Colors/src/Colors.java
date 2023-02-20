@@ -33,6 +33,27 @@ public class Colors extends Application {
         graphics.setTransform(new AffineTransform());
         graphics.setBackground(Color.white);
         graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
+
+        Color[] colors = { Color.black, Color.blue, Color.cyan, Color.darkGray, Color.gray,
+        Color.green, Color.lightGray, Color.magenta, Color.orange, Color.pink, Color.red,
+        Color.white, Color.yellow };
+
+//        addNeighboringSquare(graphics, Color.blue, 0);
+
+        for (int i = 0; i < colors.length; i++) {
+            addNeighboringSquare(graphics, colors[i], i);
+        }
+    }
+
+    private void addNeighboringSquare(FXGraphics2D graphics, Color color, int squaresDrawn) {
+        int edgeLength = (int) canvas.getWidth() / 13;
+
+        graphics.setColor(color);
+        graphics.fillRect(
+                (squaresDrawn * edgeLength),
+                0,
+                edgeLength, edgeLength
+        );
     }
 
 

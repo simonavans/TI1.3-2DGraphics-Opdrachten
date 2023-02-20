@@ -33,6 +33,15 @@ public class GradientPaintExercise extends Application {
         graphics.setTransform(new AffineTransform());
         graphics.setBackground(Color.white);
         graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
+
+        Point2D center = new Point2D.Double(canvas.getWidth()/2, canvas.getHeight()/2);
+
+        RadialGradientPaint rgp = new RadialGradientPaint(center, 20f, center,
+                new float[]{ 0.5f, 0.7f },
+                new Color[]{Color.black, Color.red}, MultipleGradientPaint.CycleMethod.NO_CYCLE);
+
+        graphics.setPaint(rgp);
+        graphics.fill(new Rectangle2D.Double(0,0,1920, 1080));
     }
 
 
