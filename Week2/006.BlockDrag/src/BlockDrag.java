@@ -1,92 +1,89 @@
-import java.awt.*;
-import java.awt.geom.*;
-
 import javafx.application.Application;
-
-import static javafx.application.Application.launch;
-
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.jfree.fx.FXGraphics2D;
-import org.jfree.fx.ResizableCanvas;
+
+import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BlockDrag extends Application {
-    private ResizableCanvas canvas;
-    private Point2D startPan = new Point2D.Double();
-    private double zoomFactor = 1.05;
+    private FXGraphics2D graphics;
+    private List<Renderable> renderables;
+    private Renderable selectedRenderable;
+    private Camera camera;
 
     @Override
-    public void start(Stage primaryStage) throws Exception
+    public void start(Stage primaryStage)
     {
-        BorderPane mainPane = new BorderPane();
-        canvas = new ResizableCanvas(g -> draw(g), mainPane);
-        canvas.resize(960, 540);
-        mainPane.setCenter(canvas);
-        primaryStage.setScene(new Scene(mainPane));
-        primaryStage.setTitle("Block Dragging");
+        Canvas canvas = new Canvas(1920, 1080);
+        this.camera = new Camera(new Point2D.Double(0, 0), this);
+        this.graphics = new FXGraphics2D(canvas.getGraphicsContext2D());
+        this.renderables = new ArrayList<>();
+        this.renderables.add(new Renderable(
+                new Rectangle2D.Double(-50, -50, 100, 100),
+                new Point2D.Double(400, 400),
+                Color.GREEN,
+                graphics,
+                this));
+        this.renderables.add(new Renderable(
+                new Rectangle2D.Double(-50, -50, 100, 100),
+                new Point2D.Double(600, 400),
+                Color.BLUE,
+                graphics,
+                this));
+
+
+        canvas.setOnMousePressed(this::onMousePressed);
+        canvas.setOnMouseReleased(e -> onMouseReleased());
+        canvas.setOnMouseDragged(this::onMouseDragged);
+
+        primaryStage.setScene(new Scene(new Group(canvas)));
+        primaryStage.setTitle("Block drag");
         primaryStage.show();
-        canvas.requestFocus();
-
-        FXGraphics2D graphics = new FXGraphics2D(canvas.getGraphicsContext2D());
-        graphics.setTransform(new AffineTransform());
-
-        canvas.setOnMousePressed(e -> mousePressed(e));
-        canvas.setOnMouseReleased(e -> mouseReleased(e));
-        canvas.setOnMouseDragged(e -> mouseDragged(e, graphics));
-        canvas.setOnScroll(e -> scroll(e, graphics));
-
-        draw(graphics);
     }
 
-
-    public void draw(FXGraphics2D graphics)
+    private void onMousePressed(MouseEvent e)
     {
-        graphics.setBackground(Color.white);
-        graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
+        for (Renderable renderable : renderables)
+        {
+            if (renderable.getTransformedShape().contains(new Point2D.Double(e.getX(), e.getY())))
+            {
+                System.out.println("found");
+                selectedRenderable = renderable;
+                return;
+            }
+        }
 
-        graphics.fillRect(300, 300, 50, 50);
+        camera.setStartTarget(new Point2D.Double(e.getX(), e.getY()));
     }
 
-
-    public static void main(String[] args)
+    private void onMouseReleased()
     {
-        launch(BlockDrag.class);
+        selectedRenderable = null;
     }
 
-    private void mousePressed(MouseEvent e)
+    private void onMouseDragged(MouseEvent e)
     {
-        startPan.setLocation(e.getX(), e.getY());
+        if (selectedRenderable != null)
+        {
+            selectedRenderable.setPosition(e.getX(), e.getY());
+        }
+        else
+        {
+            camera.moveTo(new Point2D.Double(e.getX(), e.getY()), graphics);
+        }
     }
 
-    private void mouseReleased(MouseEvent e)
+    public void redrawWorld()
     {
-
+        for (Renderable renderable : renderables)
+            renderable.redraw(graphics);
     }
-
-    private void mouseDragged(MouseEvent e, FXGraphics2D graphics)
-    {
-        double diffX = e.getX() - startPan.getX();
-        double diffY = e.getY() - startPan.getY();
-
-        startPan.setLocation(e.getX(), e.getY());
-        graphics.translate(diffX / zoomFactor, diffY / zoomFactor);
-        draw(graphics);
-    }
-
-    private void scroll(ScrollEvent e, FXGraphics2D graphics) {
-        Point2D beforeScroll = new Point2D.Double(e.getX(), e.getY());
-        double localZoomFactor = e.getDeltaY() < 0 ? 0.95 : zoomFactor;
-
-        graphics.scale(canvas.getScaleX() * localZoomFactor, canvas.getScaleY() * localZoomFactor);
-        draw(graphics);
-
-        Point2D diffScroll = new Point2D.Double(e.getX() - beforeScroll.getX(), e.getY() - beforeScroll.getY());
-        graphics.translate(diffScroll.getX(), diffScroll.getY());
-        draw(graphics);
-    }
-
 }
