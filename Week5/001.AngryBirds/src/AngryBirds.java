@@ -9,18 +9,24 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.World;
+import org.dyn4j.dynamics.joint.MotorJoint;
+import org.dyn4j.geometry.Geometry;
+import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 import org.jfree.fx.FXGraphics2D;
 import org.jfree.fx.ResizableCanvas;
 
 public class AngryBirds extends Application {
+    private Body ball;
+    private Body catapult;
 
     private ResizableCanvas canvas;
     private World world;
     private MousePicker mousePicker;
     private Camera camera;
-    private boolean debugSelected = false;
+    private boolean debugSelected = true;
     private ArrayList<GameObject> gameObjects = new ArrayList<>();
 
     @Override
@@ -30,6 +36,7 @@ public class AngryBirds extends Application {
 
         // Add debug button
         javafx.scene.control.CheckBox showDebug = new CheckBox("Show debug");
+        showDebug.setSelected(debugSelected);
         showDebug.setOnAction(e -> {
             debugSelected = showDebug.isSelected();
         });
@@ -64,7 +71,21 @@ public class AngryBirds extends Application {
 
     public void init() {
         world = new World();
-        world.setGravity(new Vector2(0, -9.8));
+        world.setGravity(new Vector2(0, -0.8));
+
+        ball = new Body();
+        ball.addFixture(Geometry.createCircle(0.15));
+        ball.getTransform().setTranslation(0,0);
+        ball.setMass(MassType.NORMAL);
+        ball.getFixture(0).setRestitution(0.75);
+        world.addBody(ball);
+        gameObjects.add(new GameObject("/basketball.png", ball, new Vector2(0,0), 0.05));
+
+        catapult = new Body();
+        catapult.addFixture(Geometry.createSquare(0.5));
+        catapult.getTransform().setTranslation(0,0);
+        catapult.setMass(MassType.INFINITE);
+        world.addBody(catapult);
     }
 
     public void draw(FXGraphics2D graphics) {
@@ -91,6 +112,14 @@ public class AngryBirds extends Application {
 
     public void update(double deltaTime) {
         mousePicker.update(world, camera.getTransform((int) canvas.getWidth(), (int) canvas.getHeight()), 100);
+
+        MotorJoint joint = new MotorJoint(ball, catapult);
+        joint.setCollisionAllowed(false);
+        joint.setMaximumForce(100.0);
+        joint.setMaximumTorque(0.1);
+
+        world.addJoint(joint);
+
         world.update(deltaTime);
     }
 

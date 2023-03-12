@@ -1,4 +1,6 @@
 import org.jfree.fx.FXGraphics2D;
+
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
@@ -7,6 +9,7 @@ public class DistanceConstraint implements Constraint {
     private double distance;
     private Particle a;
     private Particle b;
+    private double length;
 
     public DistanceConstraint(Particle a, Particle b) {
         this(a, b, a.getPosition().distance(b.getPosition()));
@@ -25,7 +28,7 @@ public class DistanceConstraint implements Constraint {
         double adjustmentDistance = (currentDistance - distance) / 2;
 
         Point2D BA = new Point2D.Double(b.getPosition().getX() - a.getPosition().getX(), b.getPosition().getY() - a.getPosition().getY());
-        double length = BA.distance(0, 0);
+        this.length = BA.distance(0, 0);
         if (length > 0.0001) // We kunnen alleen corrigeren als we een richting hebben
         {
             BA = new Point2D.Double(BA.getX() / length, BA.getY() / length);
@@ -40,7 +43,11 @@ public class DistanceConstraint implements Constraint {
     }
 
     @Override
-    public void draw(FXGraphics2D g2d) {
-        g2d.draw(new Line2D.Double(a.getPosition(), b.getPosition()));
+    public void draw(FXGraphics2D graphics) {
+        int tension = Math.min((int) length, 300);
+        if (tension > 100) {
+            graphics.setColor(new Color((int) ((tension / 300d) * 255), 0, 0));
+        }
+        graphics.draw(new Line2D.Double(a.getPosition(), b.getPosition()));
     }
 }

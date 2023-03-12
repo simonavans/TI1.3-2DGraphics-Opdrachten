@@ -5,35 +5,45 @@ import javafx.scene.canvas.Canvas;
 import javafx.stage.Stage;
 import org.jfree.fx.FXGraphics2D;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.awt.Shape;
+import java.awt.*;
+import java.awt.geom.*;
 
 public class Mirror extends Application {
-
-    Stage stage;
-    ArrayList<Renderable> renderables = new ArrayList<>();
+    private Canvas canvas;
+    private final Point2D normalVector = new Point2D.Double(1, 2.5);
+    private final Renderable square = new Renderable(
+            new Rectangle2D.Double(0, 0, 100, 100),
+            new Point2D.Double(0, 150),
+            0,
+            1
+    );
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        renderables.add(new Renderable(new Rectangle2D.Double(-50,-50,100,100), new Point2D.Double(400,400), 0.25f * (float)Math.PI, 0.75f));
-        renderables.add(new Renderable(new Rectangle2D.Double(-50,-50,100,100), new Point2D.Double(600,400), -0.25f * (float)Math.PI, 1.75f));
-
-        stage = primaryStage;
-        javafx.scene.canvas.Canvas canvas = new Canvas(1920, 1080);
+        this.canvas = new Canvas(1920, 1080);
         draw(new FXGraphics2D(canvas.getGraphicsContext2D()));
         primaryStage.setScene(new Scene(new Group(canvas)));
         primaryStage.setTitle("Hello transforms");
         primaryStage.show();
     }
 
-    public void draw(FXGraphics2D g2d) {
+    public void draw(FXGraphics2D graphics) throws NoninvertibleTransformException {
+        graphics.translate(canvas.getWidth()/2, canvas.getHeight()/2);
+        graphics.scale(1, -1);
+        int scale = 300;
+        Point2D scaledVector = new Point2D.Double(normalVector.getX() * scale, normalVector.getY() * scale);
 
-        for(Renderable r : renderables)
-            r.draw(g2d);
+        graphics.drawLine(0, -scale, 0, scale);
+        graphics.drawLine(-scale, 0, scale, 0);
+        graphics.setColor(Color.RED);
+        graphics.drawLine(0, 0, (int) scaledVector.getX(), (int) scaledVector.getY());
+        Point2D inverse = new AffineTransform().inverseTransform(new Point2D.Double(1, 2.5), null);
+        graphics.setColor(Color.YELLOW);
+        graphics.drawLine(0, 0, (int) inverse.getX() * scale, (int) inverse.getY() * scale);
 
+
+        graphics.setColor(Color.BLUE);
+        graphics.draw(square.getTransformedShape());
     }
 }
 
