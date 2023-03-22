@@ -14,9 +14,6 @@ import java.awt.geom.Rectangle2D;
 public class Rainbow extends Application
 {
     private ResizableCanvas canvas;
-    private FXGraphics2D graphics;
-    private int x = -600;
-    private int y = 600;
 
     @Override
     public void start(Stage stage) throws Exception
@@ -24,21 +21,11 @@ public class Rainbow extends Application
         BorderPane mainPane = new BorderPane();
         canvas = new ResizableCanvas(this::draw, mainPane);
         mainPane.setCenter(canvas);
-        stage.setScene(new Scene(mainPane));
+        stage.setScene(new Scene(mainPane, 1920, 1080));
         stage.setTitle("Rainbow");
-        stage.setWidth(1920);
-        stage.setHeight(1080);
         stage.show();
 
-        this.graphics = new FXGraphics2D(canvas.getGraphicsContext2D());
-        draw(graphics);
-        canvas.setOnMouseClicked(this::clicked);
-    }
-
-    private void clicked(MouseEvent e)
-    {
-        x += 10;
-        draw(graphics);
+        draw(new FXGraphics2D(canvas.getGraphicsContext2D()));
     }
 
     public void draw(FXGraphics2D graphics)
@@ -46,25 +33,26 @@ public class Rainbow extends Application
         graphics.setTransform(new AffineTransform());
         graphics.setBackground(Color.white);
         graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
+        graphics.translate(canvas.getWidth() / 2, canvas.getHeight() / 2);
 
-        int angle = -90;
         String text = "regenboog";
+        double angle = -(Math.PI / 2) + (Math.PI / text.length() / 4);
         Font font = new Font("Arial", Font.PLAIN, 150);
         FontRenderContext frc = graphics.getFontRenderContext();
 
         for (char ch : text.toCharArray())
         {
             Shape chShape = font.createGlyphVector(frc, String.valueOf(ch)).getOutline();
-//            Shape chShape = new Rectangle2D.Double(0, 0, 10, 10);
             AffineTransform transform = new AffineTransform();
-            transform.rotate(Math.toRadians(angle));
-            System.out.println(ch);
-            transform.translate(x, y);
+            transform.translate(
+                    250 * Math.cos(angle - (Math.PI / 2)),
+                    250 * Math.sin(angle - (Math.PI / 2))
+            );
+            transform.rotate(angle);
 
-            graphics.draw(transform.createTransformedShape(chShape));
-            angle += 30;
-//            x += 50;
-//            y += 30;
+            graphics.setColor(Color.getHSBColor((float) text.indexOf(ch) / text.length(), 1, 1));
+            graphics.fill(transform.createTransformedShape(chShape));
+            angle += Math.PI/text.length();
         }
 
 //        graphics.draw(AffineTransform.getTranslateInstance(100, 100).createTransformedShape(shape));
