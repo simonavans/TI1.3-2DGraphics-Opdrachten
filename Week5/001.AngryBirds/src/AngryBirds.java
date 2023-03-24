@@ -73,9 +73,15 @@ public class AngryBirds extends Application {
         world = new World();
         world.setGravity(new Vector2(0, -0.8));
 
+        Body ground = new Body();
+        ground.addFixture(Geometry.createRectangle(90, 1));
+        ground.getTransform().setTranslation(-5, -5);
+        ground.setMass(MassType.INFINITE);
+        world.addBody(ground);
+
         ball = new Body();
         ball.addFixture(Geometry.createCircle(0.15));
-        ball.getTransform().setTranslation(0,0);
+        ball.getTransform().setTranslation(-5,-3);
         ball.setMass(MassType.NORMAL);
         ball.getFixture(0).setRestitution(0.75);
         world.addBody(ball);
@@ -83,9 +89,21 @@ public class AngryBirds extends Application {
 
         catapult = new Body();
         catapult.addFixture(Geometry.createSquare(0.5));
-        catapult.getTransform().setTranslation(0,0);
+        catapult.getTransform().setTranslation(-5,-3);
         catapult.setMass(MassType.INFINITE);
         world.addBody(catapult);
+
+        for (int y = 0; y < 5; y++) {
+            for (int x = 0; x < 5 - y; x++) {
+                Body box = new Body();
+                box.addFixture(Geometry.createRectangle(0.5, 0.5));
+                box.setMass(MassType.NORMAL);
+                box.getTransform().setTranslation(4 + (x * 0.5) + 0.25 * y, (y * 0.5) - 4.25);
+                world.addBody(box);
+                GameObject gameObject = new GameObject("crate.png", box, new Vector2(0, 0), 0.2);
+                gameObjects.add(gameObject);
+            }
+        }
     }
 
     public void draw(FXGraphics2D graphics) {
